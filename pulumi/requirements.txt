@@ -1,1 +1,4 @@
-csfcsff
+pulumi_docker==3.2.0
+gitpython
+--extra-index-url https://nexus.locus-internal.com/repository/pypi-local/simple
+locus-pulumi-aws==2.1.0
