@@ -10,7 +10,7 @@ ecr.LifecyclePolicy(
                     "selection":{
                         "tagStatus":"any",
                         "countType":"imageCountMoreThan",
-                        "countNumber":3
+                        "countNumber": 13
                     },
                     "action":{
                         "type":"expire"
