@@ -146,19 +146,17 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixMilli(),
 	)
 
-	// headersMap := make(map[string]string)
-	// for key, values := range req.Header {
-	// 	headersMap[key] = values[0] // Take the first value for simplicity
-	// }
+	headersMap := make(map[string]string)
+	for key, values := range req.Header {
+		headersMap[key] = values[0] // Take the first value for simplicity
+	}
 
-	// fmt.Println(req.Header)
-	// fmt.Println(headersMap)
 	requestData := RequestData{
-		Path: req.URL.Path,
-		Host: req.Host,
-		// Headers: headersMap,
-		// IP: reqSourceIP,
-		// Body: string(body),
+		Path:    req.URL.Path,
+		Host:    req.Host,
+		Headers: headersMap,
+		IP:      reqSourceIP,
+		Body:    string(body),
 	}
 
 	parquetBuffer, err := convertToParquet(requestData)
