@@ -14,7 +14,6 @@ import (
 	// "bytes"
 	// crypto_rand "crypto/rand"
 	// "encoding/binary"
-	"flag"
 	"fmt"
 	// "hash/crc64"
 	"io"
@@ -26,19 +25,20 @@ import (
 	"os"
 	"time"
 
+	// "github.com/aws/aws-sdk-go-v2/aws"
+	// "github.com/aws/aws-sdk-go-v2/config"
+	// "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/examples/util"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/google/gopacket/tcpassembly/tcpreader"
+	// "github.com/xitongsys/parquet-go/parquet"
+	// "github.com/xitongsys/parquet-go/writer"
 )
 
-var fwdPerc = flag.Float64("percentage", 100, "Must be between 0 and 100.")
-var fwdBy = flag.String("percentage-by", "", "Can be empty. Otherwise, valid values are: header, remoteaddr.")
-var fwdHeader = flag.String("percentage-by-header", "", "If percentage-by is header, then specify the header here.")
-var reqPort = flag.Int("filter-request-port", 80, "Must be between 0 and 65535.")
-var keepHostHeader = flag.Bool("keep-host-header", false, "Keep Host header from original request.")
+var reqPort = 80
 
 // Build a simple HTTP request parser using tcpassembly.StreamFactory and tcpassembly.Stream interfaces
 
@@ -86,7 +86,6 @@ func (h *httpStream) run() {
 }
 
 func forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	fmt.Println(body)
 }
 
 // Listen for incoming connections.
@@ -111,21 +110,6 @@ func main() {
 	var handle *pcap.Handle
 	var err error
 
-	flag.Parse()
-	//labels validation
-	if *fwdPerc > 100 || *fwdPerc < 0 {
-		err = fmt.Errorf("Flag percentage is not between 0 and 100. Value: %f.", *fwdPerc)
-	} else if *fwdBy != "" && *fwdBy != "header" && *fwdBy != "remoteaddr" {
-		err = fmt.Errorf("Flag percentage-by (%s) is not valid.", *fwdBy)
-	} else if *fwdBy == "header" && *fwdHeader == "" {
-		err = fmt.Errorf("Flag percentage-by is set to header, but percentage-by-header is empty.")
-	} else if *reqPort > 65535 || *reqPort < 0 {
-		err = fmt.Errorf("Flag filter-request-port is not between 0 and 65535. Value: %f.", *fwdPerc)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// Set up pcap packet capture
 	log.Printf("Starting capture on interface vxlan0")
 	handle, err = pcap.OpenLive("vxlan0", 8951, true, pcap.BlockForever)
@@ -134,7 +118,7 @@ func main() {
 	}
 
 	// Set up BPF filter
-	BPFFilter := fmt.Sprintf("%s%d", "tcp and dst port ", *reqPort)
+	BPFFilter := fmt.Sprintf("%s%d", "tcp and dst port ", reqPort)
 	if err := handle.SetBPFFilter(BPFFilter); err != nil {
 		log.Fatal(err)
 	}
