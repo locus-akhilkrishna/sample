@@ -13,6 +13,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	// crypto_rand "crypto/rand"
 	// "encoding/binary"
 	"fmt"
@@ -145,11 +146,16 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 	objectKey := fmt.Sprintf("%s/%d/%02d/%02d/%d.parquet",
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixMilli(),
 	)
+	jsonData, err := json.Marshal(req.Header)
+
+	if err != nil {
+		fmt.Println("Error converting struct to JSON:", err)
+	}
 
 	requestData := RequestData{
 		Path:    req.URL.Path,
 		Host:    req.Host,
-		Headers: fmt.Sprint(req.Header),
+		Headers: string(jsonData),
 		IP:      reqSourceIP,
 		Body:    string(body),
 	}
