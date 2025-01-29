@@ -40,6 +40,19 @@ import (
 
 var reqPort = 80
 
+cfg, err := config.LoadDefaultConfig(context.TODO())
+    if err != nil {
+        log.Fatal(err)
+    }
+s3Client := s3.NewFromConfig(cfg)
+
+
+type BucketBasics struct {
+	S3Client *s3.Client
+}
+
+bucketBasics := BucketBasics{S3Client: s3Client}
+
 // Build a simple HTTP request parser using tcpassembly.StreamFactory and tcpassembly.Stream interfaces
 
 // httpStreamFactory implements tcpassembly.StreamFactory
@@ -80,13 +93,13 @@ func (h *httpStream) run() {
 				return
 			}
 			req.Body.Close()
-			go forwardRequest(req, reqSourceIP, reqDestionationPort, body)
+			go bucketBasics.forwardRequest(req, reqSourceIP, reqDestionationPort, body)
 		}
 	}
 }
 
-func forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	fmt.Println(req)
+func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
+	
 }
 
 // Listen for incoming connections.
