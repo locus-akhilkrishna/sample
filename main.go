@@ -11,6 +11,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	// "bytes"
 	// crypto_rand "crypto/rand"
 	// "encoding/binary"
@@ -26,8 +27,8 @@ import (
 	"time"
 
 	// "github.com/aws/aws-sdk-go-v2/aws"
-	// "github.com/aws/aws-sdk-go-v2/config"
-	// "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/examples/util"
 	"github.com/google/gopacket/layers"
@@ -40,18 +41,18 @@ import (
 
 var reqPort = 80
 
-cfg, err := config.LoadDefaultConfig(context.TODO())
-    if err != nil {
-        log.Fatal(err)
-    }
-s3Client := s3.NewFromConfig(cfg)
+var cfg, _ = config.LoadDefaultConfig(context.TODO())
 
+// if err != nil {
+//     log.Fatal(err)
+// }
+var s3Client = s3.NewFromConfig(cfg)
 
 type BucketBasics struct {
 	S3Client *s3.Client
 }
 
-bucketBasics := BucketBasics{S3Client: s3Client}
+var bucketBasics = BucketBasics{S3Client: s3Client}
 
 // Build a simple HTTP request parser using tcpassembly.StreamFactory and tcpassembly.Stream interfaces
 
@@ -99,7 +100,7 @@ func (h *httpStream) run() {
 }
 
 func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	
+
 }
 
 // Listen for incoming connections.
