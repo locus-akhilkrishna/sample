@@ -68,11 +68,11 @@ type httpStream struct {
 }
 
 type RequestData struct {
-	Path    string            `parquet:"name=path, type=BYTE_ARRAY, encoding=PLAIN"`
-	Host    string            `parquet:"name=host, type=BYTE_ARRAY, encoding=PLAIN"`
-	Headers map[string]string `parquet:"name=headers, type=MAP, encoding=PLAIN`
-	IP      string            `parquet:"name=ip, type=BYTE_ARRAY, encoding=PLAIN"`
-	Body    string            `parquet:"name=body, type=BYTE_ARRAY, encoding=PLAIN"`
+	Path    string `parquet:"name=path, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Host    string `parquet:"name=host, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Headers string `parquet:"name=headers, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	IP      string `parquet:"name=ip, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Body    string `parquet:"name=body, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
 }
 
 func (h *httpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
@@ -111,7 +111,7 @@ func (h *httpStream) run() {
 
 func convertToParquet(data RequestData) ([]byte, error) {
 	var buf bytes.Buffer
-	pw, err := writer.NewParquetWriterFromWriter(&buf, new(RequestData), 1)
+	pw, err := writer.NewParquetWriterFromWriter(&buf, new(RequestData), 4)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Parquet writer: %w", err)
 	}
@@ -146,15 +146,10 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixMilli(),
 	)
 
-	headersMap := make(map[string]string)
-	for key, values := range req.Header {
-		headersMap[key] = values[0] // Take the first value for simplicity
-	}
-
 	requestData := RequestData{
 		Path:    req.URL.Path,
 		Host:    req.Host,
-		Headers: headersMap,
+		Headers: fmt.Sprint(req.Header),
 		IP:      reqSourceIP,
 		Body:    string(body),
 	}

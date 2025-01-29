@@ -1,0 +1,88 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	// "github.com/xitongsys/parquet-go-source/local"
+	"github.com/xitongsys/parquet-go/parquet"
+	"github.com/xitongsys/parquet-go/writer"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+)
+
+var s3Bucket = "locus-fastly-poc"
+
+var cfg, _ = config.LoadDefaultConfig(context.TODO(), config.WithRegion("ap-south-1"))
+
+var s3Client = s3.NewFromConfig(cfg)
+
+type Student struct {
+	Name    string  `parquet:"name=name, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Age     int32   `parquet:"name=age, type=INT32"`
+	Id      int64   `parquet:"name=id, type=INT64"`
+	Weight  float32 `parquet:"name=weight, type=FLOAT"`
+	Sex     string  `parquet:"name=sex, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Day     int32   `parquet:"name=day, type=INT32, convertedtype=DATE"`
+	Scores  string  `parquet:"name=scores, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	Ignored int32   //without parquet tag and won't write
+}
+
+func main() {
+	// var err error
+	// fw, err := local.NewLocalFileWriter("to_json.parquet")
+	// if err != nil {
+	// 	log.Println("Can't create local file", err)
+	// 	return
+	// }
+
+	var buf bytes.Buffer
+	// pw, err := writer.NewParquetWriterFromWriter(&buf, new(RequestData), 4)
+
+	//write
+	pw, err := writer.NewParquetWriterFromWriter(&buf, new(Student), 4)
+	if err != nil {
+		log.Println("Can't create parquet writer", err)
+		return
+	}
+
+	pw.RowGroupSize = 128 * 1024 * 1024 //128M
+	pw.CompressionType = parquet.CompressionCodec_SNAPPY
+	num := 10
+	for i := 0; i < num; i++ {
+		stu := Student{
+			Name:   "StudentName",
+			Age:    int32(20 + i%5),
+			Id:     int64(i),
+			Weight: float32(50.0 + float32(i)*0.1),
+			Sex:    "male",
+			Day:    int32(time.Now().Unix() / 3600 / 24),
+			Scores: fmt.Sprint(map[string]string{
+				"math":     "int32(90 + i%5)",
+				"physics":  "int32(90 + i%3)",
+				"computer": "int32(80 + i%10)",
+			}),
+		}
+		if err = pw.Write(stu); err != nil {
+			log.Println("Write error", err)
+		}
+	}
+	if err = pw.WriteStop(); err != nil {
+		log.Println("WriteStop error", err)
+		return
+	}
+
+	_, sss := s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(s3Bucket),
+		Key:    aws.String("/akhil/cool.parquet"),
+		Body:   bytes.NewReader(buf.Bytes()),
+	})
+	if sss != nil {
+		log.Println("Error uploading Parquet file to S3:", sss)
+	}
+}
