@@ -65,6 +65,14 @@ type httpStream struct {
 	r              tcpreader.ReaderStream
 }
 
+type RequestData struct {
+	Path    string            `parquet:"name=path, type=UTF8"`
+	Host    string            `parquet:"name=host, type=UTF8"`
+	Headers map[string]string `parquet:"name=headers, type=MAP"`
+	IP      string            `parquet:"name=ip, type=UTF8"`
+	Body    string            `parquet:"name=body, type=UTF8"`
+}
+
 func (h *httpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
 	hstream := &httpStream{
 		net:       net,
