@@ -100,7 +100,7 @@ func (h *httpStream) run() {
 }
 
 func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-
+	fmt.Println(req)
 }
 
 // Listen for incoming connections.
