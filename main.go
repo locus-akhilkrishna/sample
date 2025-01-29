@@ -114,7 +114,7 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixNano(),
 	)
 
-	fmt.println(objectKey)
+	fmt.Println(objectKey)
 }
 
 // Listen for incoming connections.
