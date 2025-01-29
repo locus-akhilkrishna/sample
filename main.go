@@ -43,7 +43,7 @@ var reqPort = 80
 
 var s3Bucket = "locus-fastly-poc"
 
-var cfg, _ = config.LoadDefaultConfig(context.TODO())
+var cfg, _ = config.LoadDefaultConfig(context.TODO(), config.WithRegion("ap-south-1"))
 
 // if err != nil {
 //     log.Fatal(err)
