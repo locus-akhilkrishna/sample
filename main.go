@@ -68,11 +68,11 @@ type httpStream struct {
 }
 
 type RequestData struct {
-	Path    string            `parquet:"name=path, type=UTF8"`
-	Host    string            `parquet:"name=host, type=UTF8"`
-	Headers map[string]string `parquet:"name=headers, type=MAP`
-	IP      string            `parquet:"name=ip, type=UTF8"`
-	Body    string            `parquet:"name=body, type=UTF8"`
+	Path string `parquet:"name=path, type=UTF8"`
+	Host string `parquet:"name=host, type=UTF8"`
+	// Headers map[string]string `parquet:"name=headers, type=MAP`
+	IP   string `parquet:"name=ip, type=UTF8"`
+	Body string `parquet:"name=body, type=UTF8"`
 }
 
 func (h *httpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
@@ -146,19 +146,19 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixMilli(),
 	)
 
-	headersMap := make(map[string]string)
-	for key, values := range req.Header {
-		headersMap[key] = values[0] // Take the first value for simplicity
-	}
+	// headersMap := make(map[string]string)
+	// for key, values := range req.Header {
+	// 	headersMap[key] = values[0] // Take the first value for simplicity
+	// }
 
-	fmt.Println(req.Header)
-	fmt.Println(headersMap)
+	// fmt.Println(req.Header)
+	// fmt.Println(headersMap)
 	requestData := RequestData{
-		Path:    req.URL.Path,
-		Host:    req.Host,
-		Headers: headersMap,
-		IP:      reqSourceIP,
-		Body:    string(body),
+		Path: req.URL.Path,
+		Host: req.Host,
+		// Headers: headersMap,
+		IP:   reqSourceIP,
+		Body: string(body),
 	}
 
 	parquetBuffer, err := convertToParquet(requestData)
