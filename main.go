@@ -86,7 +86,7 @@ func (h *httpStream) run() {
 }
 
 func forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	fmt.Println(req.RequestURI)
+	fmt.Println(req)
 }
 
 // Listen for incoming connections.
@@ -170,7 +170,6 @@ func main() {
 
 		case <-ticker:
 			// Every minute, flush connections that haven't seen activity in the past 1 minute.
-			log.Println("ticker")
 			assembler.FlushOlderThan(time.Now().Add(time.Minute * -1))
 		}
 	}

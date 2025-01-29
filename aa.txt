@@ -1,0 +1,26 @@
+#!/bin/bash -xe
+#
+#
+### update and install ###
+#
+export HOME=~
+yum update -y
+yum install git -y
+yum install go -y
+# dependency of github.com/google/gopacket
+yum install libpcap-devel -y
+#
+#
+### dependency of main.go ###
+go env GOPATH
+echo 'export GOPATH=$HOME/go' >>~/.bash_profile
+source ~/.bash_profile
+#
+#
+#
+### create a virtual network interface that gets decapsulated VXLAN packets
+#### compile & run go script ###
+go install github.com/aws-samples/http-requests-mirroring@latest
+sudo ip link add vxlan0 type vxlan id 1234 dev eth0 dstport 4789
+sudo ip link set vxlan0 up
+$GOPATH"/bin/http-requests-mirroring" -destination "http://10.0.126.152" -percentage "100"  -filter-request-port "80" -keep-host-header
