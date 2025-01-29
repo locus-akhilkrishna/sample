@@ -86,7 +86,7 @@ func (h *httpStream) run() {
 }
 
 func forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	fmt.Println(req)
+	fmt.Println(body)
 }
 
 // Listen for incoming connections.
