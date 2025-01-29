@@ -68,11 +68,11 @@ type httpStream struct {
 }
 
 type RequestData struct {
-	Path    string            `parquet:"name=path, type=BYTE_ARRAY"`
-	Host    string            `parquet:"name=host, type=BYTE_ARRAY"`
-	Headers map[string]string `parquet:"name=headers, type=MAP`
-	IP      string            `parquet:"name=ip, type=BYTE_ARRAY"`
-	Body    string            `parquet:"name=body, type=BYTE_ARRAY"`
+	Path    string            `parquet:"name=path, type=BYTE_ARRAY, encoding=PLAIN"`
+	Host    string            `parquet:"name=host, type=BYTE_ARRAY, encoding=PLAIN"`
+	Headers map[string]string `parquet:"name=headers, type=MAP, encoding=PLAIN`
+	IP      string            `parquet:"name=ip, type=BYTE_ARRAY, encoding=PLAIN"`
+	Body    string            `parquet:"name=body, type=BYTE_ARRAY, encoding=PLAIN"`
 }
 
 func (h *httpStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
