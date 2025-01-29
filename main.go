@@ -119,7 +119,7 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 
 	now := time.Now()
 	objectKey := fmt.Sprintf("%s/%d/%02d/%02d/%d.parquet",
-		hostname, now.Year(), now.Month(), now.Day(), now.UnixNano(),
+		hostname, now.Year(), now.Month(), now.Day(), now.UnixMilli(),
 	)
 
 	headersMap := make(map[string]string)
