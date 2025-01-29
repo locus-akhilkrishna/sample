@@ -100,7 +100,21 @@ func (h *httpStream) run() {
 }
 
 func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
-	fmt.Println(req)
+	if req.Method != http.MethodPost {
+		return // Only process POST requests
+	}
+
+	hostname := req.Host
+	if hostname == "" {
+		hostname = "unknown"
+	}
+
+	now := time.Now()
+	objectKey := fmt.Sprintf("%s/%d/%02d/%02d/%d.parquet",
+		hostname, now.Year(), now.Month(), now.Day(), now.UnixNano(),
+	)
+
+	fmt.println(objectKey)
 }
 
 // Listen for incoming connections.
