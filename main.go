@@ -71,7 +71,7 @@ type RequestData struct {
 	Path string `parquet:"name=path, type=UTF8"`
 	Host string `parquet:"name=host, type=UTF8"`
 	// Headers map[string]string `parquet:"name=headers, type=MAP`
-	IP string `parquet:"name=ip, type=UTF8"`
+	// IP string `parquet:"name=ip, type=UTF8"`
 	// Body string `parquet:"name=body, type=UTF8"`
 }
 
@@ -157,7 +157,7 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		Path: req.URL.Path,
 		Host: req.Host,
 		// Headers: headersMap,
-		IP: reqSourceIP,
+		// IP: reqSourceIP,
 		// Body: string(body),
 	}
 
