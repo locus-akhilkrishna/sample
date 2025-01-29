@@ -26,7 +26,7 @@ import (
 	"os"
 	"time"
 
-	// "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/gopacket"
@@ -107,6 +107,28 @@ func (h *httpStream) run() {
 			go bucketBasics.forwardRequest(req, reqSourceIP, reqDestionationPort, body)
 		}
 	}
+}
+
+func convertToParquet(data RequestData) ([]byte, error) {
+	var buf bytes.Buffer
+	pw, err := writer.NewParquetWriterFromWriter(&buf, new(RequestData), 1)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Parquet writer: %w", err)
+	}
+
+	pw.RowGroupSize = 128 * 1024 * 1024 // 128MB
+	pw.PageSize = 8 * 1024              // 8KB
+	pw.CompressionType = parquet.CompressionCodec_SNAPPY
+
+	if err := pw.Write(data); err != nil {
+		return nil, fmt.Errorf("failed to write Parquet data: %w", err)
+	}
+
+	if err := pw.WriteStop(); err != nil {
+		return nil, fmt.Errorf("failed to finalize Parquet file: %w", err)
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string, reqDestionationPort string, body []byte) {
