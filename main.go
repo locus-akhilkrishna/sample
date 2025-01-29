@@ -34,7 +34,6 @@ import (
 	"github.com/google/gopacket/tcpassembly/tcpreader"
 )
 
-var fwdDestination = flag.String("destination", "", "Destination of the forwarded requests.")
 var fwdPerc = flag.Float64("percentage", 100, "Must be between 0 and 100.")
 var fwdBy = flag.String("percentage-by", "", "Can be empty. Otherwise, valid values are: header, remoteaddr.")
 var fwdHeader = flag.String("percentage-by-header", "", "If percentage-by is header, then specify the header here.")
@@ -159,6 +158,7 @@ func main() {
 		case packet := <-packets:
 			// A nil packet indicates the end of a pcap file.
 			if packet == nil {
+				log.Println("no packet")
 				return
 			}
 			if packet.NetworkLayer() == nil || packet.TransportLayer() == nil || packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
@@ -170,6 +170,7 @@ func main() {
 
 		case <-ticker:
 			// Every minute, flush connections that haven't seen activity in the past 1 minute.
+			log.Println("ticker")
 			assembler.FlushOlderThan(time.Now().Add(time.Minute * -1))
 		}
 	}
