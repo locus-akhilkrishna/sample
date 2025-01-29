@@ -105,7 +105,7 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 	}
 
 	hostname := req.Host
-	if hostname == "" && hostname == reqSourceIP {
+	if hostname == "" {
 		hostname = "unknown"
 	}
 
@@ -114,7 +114,20 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		hostname, now.Year(), now.Month(), now.Day(), now.UnixNano(),
 	)
 
-	fmt.Println(objectKey)
+	headersMap := make(map[string]string)
+	for key, values := range req.Header {
+		headersMap[key] = values[0] // Take the first value for simplicity
+	}
+
+	requestData := RequestData{
+		Path:    req.URL.Path,
+		Host:    req.Host,
+		Headers: headersMap,
+		IP:      reqSourceIP,
+		Body:    string(body),
+	}
+
+	fmt.Println(requestData)
 }
 
 // Listen for incoming connections.
