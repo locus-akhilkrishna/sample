@@ -34,8 +34,8 @@ var (
 	s3Client  = s3.NewFromConfig(cfg)
 	bufferMap = make(map[string][]RequestData) // Group by host
 	bufferMux sync.Mutex
-	flushSize = 100              // Flush when 100 requests are collected per host
-	flushTime = 60 * time.Second // Flush every 10 seconds per host
+	flushSize = 1000             // Flush when 100 requests are collected per host
+	flushTime = 60 * time.Second // Flush every 60 seconds per host
 )
 
 type BucketBasics struct {
