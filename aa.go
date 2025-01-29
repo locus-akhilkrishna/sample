@@ -77,36 +77,38 @@ func (h *httpStream) run() {
 			return
 		} else if err != nil {
 			log.Println("Error reading stream", h.net, h.transport, ":", err)
-		} else {
-			reqSourceIP := h.net.Src().String()
-			body, bErr := io.ReadAll(req.Body)
-			if bErr != nil {
-				return
-			}
-			req.Body.Close()
-
-			jsonData, err := json.Marshal(req.Header)
-			if err != nil {
-				log.Println("Error marshalling headers to JSON:", err)
-				jsonData = {}
-			}
-
-			hostname := req.Host
-			if hostname == "" {
-				hostname = "unknown"
-			}
-
-			data := RequestData{
-				Path:    req.URL.Path,
-				Host:    hostname,
-				Headers: string(jsonData),
-				IP:      reqSourceIP,
-				Body:    string(body),
-			}
-
-			// Add data to buffer for specific host
-			addToBuffer(hostname, data)
+			continue
 		}
+
+		reqSourceIP := h.net.Src().String()
+		body, bErr := io.ReadAll(req.Body)
+		if bErr != nil {
+			log.Println("Error reading request body:", bErr)
+			continue
+		}
+		req.Body.Close()
+
+		jsonData, err := json.Marshal(req.Header)
+		if err != nil {
+			log.Println("Error marshalling headers to JSON:", err)
+			continue
+		}
+
+		hostname := req.Host
+		if hostname == "" {
+			hostname = "unknown"
+		}
+
+		data := RequestData{
+			Path:    req.URL.Path,
+			Host:    hostname,
+			Headers: string(jsonData),
+			IP:      reqSourceIP,
+			Body:    string(body),
+		}
+
+		// Add data to buffer for specific host
+		addToBuffer(hostname, data)
 	}
 }
 
