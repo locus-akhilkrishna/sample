@@ -70,7 +70,7 @@ type httpStream struct {
 type RequestData struct {
 	Path    string            `parquet:"name=path, type=UTF8"`
 	Host    string            `parquet:"name=host, type=UTF8"`
-	Headers map[string]string `parquet:"name=headers, type=MAP"`
+	Headers map[string]string `parquet:"name=headers, type=MAP, convertedtype=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=UTF8"`
 	IP      string            `parquet:"name=ip, type=UTF8"`
 	Body    string            `parquet:"name=body, type=UTF8"`
 }
