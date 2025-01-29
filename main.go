@@ -105,7 +105,7 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 	}
 
 	hostname := req.Host
-	if hostname == "" {
+	if hostname == "" && hostname == reqSourceIP {
 		hostname = "unknown"
 	}
 
