@@ -83,15 +83,14 @@ func (h *httpStream) run() {
 		reqSourceIP := h.net.Src().String()
 		body, bErr := io.ReadAll(req.Body)
 		if bErr != nil {
-			log.Println("Error reading request body:", bErr)
-			continue
+			return
 		}
 		req.Body.Close()
 
 		jsonData, err := json.Marshal(req.Header)
 		if err != nil {
 			log.Println("Error marshalling headers to JSON:", err)
-			continue
+			jsonData = []byte("{}")
 		}
 
 		hostname := req.Host
