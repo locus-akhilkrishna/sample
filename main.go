@@ -11,8 +11,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
-	// "bytes"
 	// crypto_rand "crypto/rand"
 	// "encoding/binary"
 	"fmt"
@@ -35,11 +35,13 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/google/gopacket/tcpassembly/tcpreader"
-	// "github.com/xitongsys/parquet-go/parquet"
-	// "github.com/xitongsys/parquet-go/writer"
+	"github.com/xitongsys/parquet-go/parquet"
+	"github.com/xitongsys/parquet-go/writer"
 )
 
 var reqPort = 80
+
+var s3Bucket = "locus-fastly-poc"
 
 var cfg, _ = config.LoadDefaultConfig(context.TODO())
 
@@ -135,8 +137,22 @@ func (basics BucketBasics) forwardRequest(req *http.Request, reqSourceIP string,
 		Body:    string(body),
 	}
 
-	fmt.Println(requestData)
-	fmt.Println(objectKey)
+	parquetBuffer, err := convertToParquet(requestData)
+	if err != nil {
+		log.Println("Error converting to Parquet:", err)
+		return
+	}
+
+	go func() {
+		_, err := basics.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(s3Bucket),
+			Key:    aws.String(objectKey),
+			Body:   bytes.NewReader(parquetBuffer),
+		})
+		if err != nil {
+			log.Println("Error uploading Parquet file to S3:", err)
+		}
+	}()
 }
 
 // Listen for incoming connections.
